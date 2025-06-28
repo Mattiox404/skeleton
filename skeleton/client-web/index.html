@@ -1,0 +1,803 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carta Cultura Giovani</title>
+    <style>
+        /* Stili CSS minimali per una presentazione pulita */
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 20px; 
+            background-color: #f5f5f5; 
+        }
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: white; 
+            padding: 20px; 
+            border-radius: 8px; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); 
+        }
+        .header { 
+            text-align: center; 
+            color: #2c3e50; 
+            border-bottom: 2px solid #3498db; 
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
+        }
+        .section { 
+            margin: 20px 0; 
+            padding: 15px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+        }
+        .hidden { display: none; }
+        .error { color: #e74c3c; font-weight: bold; }
+        .success { color: #27ae60; font-weight: bold; }
+        .budget-summary { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 15px; 
+            margin: 15px 0; 
+        }
+        .budget-card { 
+            background: #ecf0f1; 
+            padding: 15px; 
+            border-radius: 5px; 
+            text-align: center; 
+        }
+        .budget-card h4 { margin: 0 0 10px 0; color: #2c3e50; }
+        .budget-card .amount { font-size: 1.5em; font-weight: bold; color: #27ae60; }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin: 15px 0; 
+        }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 10px; text-align: left; }
+        th { background-color: #3498db; color: white; }
+        tr:nth-child(even) { background-color: #f9f9f9; }
+        button { 
+            background-color: #3498db; 
+            color: white; 
+            padding: 8px 16px; 
+            border: none; 
+            border-radius: 4px; 
+            cursor: pointer; 
+            margin: 5px; 
+        }
+        button:hover { background-color: #2980b9; }
+        button.danger { background-color: #e74c3c; }
+        button.danger:hover { background-color: #c0392b; }
+        button.success {
+            background-color: #27ae60;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button.success:hover { background-color: #229954; }
+        input, select { 
+            padding: 8px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            margin: 5px; 
+        }
+        .form-group { margin: 10px 0; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .category-list { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
+        .category-item { 
+            background: #ecf0f1; 
+            padding: 5px 10px; 
+            border-radius: 15px; 
+            font-size: 0.9em; 
+        }
+        .loading { text-align: center; color: #7f8c8d; font-style: italic; }
+        .navigation { margin: 20px 0; text-align: center; }
+        .navigation button { margin: 0 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎭 Carta Cultura Giovani</h1>
+            <p>Gestione dei tuoi buoni cultura da 500€</p>
+        </div>
+
+        <!-- Messaggio di stato globale -->
+        <div id="globalMessage" class="hidden"></div>
+
+        <!-- Sezione Login/Registrazione -->
+        <div id="authSection" class="section">
+            <h2>🔐 Accesso</h2>
+            
+            <!-- Login Form -->
+            <div id="loginForm">
+                <h3>Accedi con il tuo Codice Fiscale</h3>
+                <div class="form-group">
+                    <label for="loginFiscalCode">Codice Fiscale:</label>
+                    <input type="text" id="loginFiscalCode" maxlength="16" placeholder="RSSMRA90A01F205X" style="text-transform: uppercase;">
+                </div>
+                <button onclick="login()">Accedi</button>
+                <button onclick="showRegistrationForm()">Nuovo utente? Registrati</button>
+            </div>
+
+            <!-- Registration Form -->
+            <div id="registrationForm" class="hidden">
+                <h3>Registrazione Nuovo Utente</h3>
+                <div class="form-group">
+                    <label for="regName">Nome:</label>
+                    <input type="text" id="regName" required>
+                </div>
+                <div class="form-group">
+                    <label for="regSurname">Cognome:</label>
+                    <input type="text" id="regSurname" required>
+                </div>
+                <div class="form-group">
+                    <label for="regEmail">Email:</label>
+                    <input type="email" id="regEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="regFiscalCode">Codice Fiscale:</label>
+                    <input type="text" id="regFiscalCode" maxlength="16" style="text-transform: uppercase;" required>
+                </div>
+                <button onclick="register()">Registrati</button>
+                <button onclick="showLoginForm()">Torna al Login</button>
+            </div>
+        </div>
+
+        <!-- Sezione Dashboard Utente -->
+        <div id="userDashboard" class="hidden">
+            <!-- User Info -->
+            <div class="section">
+                <h2>👤 Il Mio Profilo</h2>
+                <div id="userInfo"></div>
+                <div class="navigation">
+                    <button onclick="logout()">Logout</button>
+                    <button onclick="showAdminDashboard()">Dashboard Sistema</button>
+                </div>
+            </div>
+
+            <!-- Budget Summary -->
+            <div class="section">
+                <h2>💰 Stato Budget</h2>
+                <div id="budgetSummary" class="budget-summary"></div>
+            </div>
+
+            <!-- Voucher Creation Form -->
+            <div class="section">
+                <h2>🎫 Crea Nuovo Buono</h2>
+                <div class="form-group">
+                    <label for="voucherAmount">Importo (€):</label>
+                    <input type="number" id="voucherAmount" min="1" max="500" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label for="voucherCategory">Categoria:</label>
+                    <select id="voucherCategory" required>
+                        <option value="">Seleziona categoria...</option>
+                        <option value="cinema">Cinema</option>
+                        <option value="musica">Musica</option>
+                        <option value="concerti">Concerti</option>
+                        <option value="eventi culturali">Eventi Culturali</option>
+                        <option value="libri">Libri</option>
+                        <option value="musei">Musei</option>
+                        <option value="strumenti musicali">Strumenti Musicali</option>
+                        <option value="teatro">Teatro</option>
+                        <option value="danza">Danza</option>
+                    </select>
+                </div>
+                <button onclick="createVoucher()">Crea Buono</button>
+            </div>
+
+            <!-- User Vouchers List -->
+            <div class="section">
+                <h2>📋 I Miei Buoni</h2>
+                <div id="userVouchersList"></div>
+            </div>
+        </div>
+
+        <!-- Sezione Admin Dashboard -->
+        <div id="adminDashboard" class="hidden">
+            <div class="section">
+                <h2>🔧 Dashboard Sistema</h2>
+                <div class="navigation">
+                    <button onclick="showUserDashboard()">Torna al Profilo</button>
+                    <button onclick="refreshSystemStats()">Aggiorna Statistiche</button>
+                </div>
+                
+                <!-- System Stats -->
+                <div id="systemStats"></div>
+                
+                <!-- All Users -->
+                <h3>👥 Tutti gli Utenti</h3>
+                <div id="allUsersList"></div>
+                
+                <!-- All Vouchers -->
+                <h3>🎫 Tutti i Buoni</h3>
+                <div id="allVouchersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URI = "http://localhost:8080";
+        let currentUser = null;
+
+        // ========================
+        // UTILITIES E HELPERS
+        // ========================
+
+        function showMessage(message, type = 'info') {
+            const messageDiv = document.getElementById('globalMessage');
+            messageDiv.className = type === 'error' ? 'error' : (type === 'success' ? 'success' : '');
+            messageDiv.textContent = message;
+            messageDiv.classList.remove('hidden');
+            
+            setTimeout(() => {
+                messageDiv.classList.add('hidden');
+            }, 5000);
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('it-IT', {
+                style: 'currency',
+                currency: 'EUR',
+                minimumFractionDigits: 2
+            }).format(amount);
+        }
+
+        function formatDateTime(dateTimeString) {
+            if (!dateTimeString) return 'N/A';
+            const date = new Date(dateTimeString);
+            return date.toLocaleDateString('it-IT') + ' ' + date.toLocaleTimeString('it-IT');
+        }
+
+        function clearForms() {
+            document.querySelectorAll('input').forEach(input => {
+                if (input.type !== 'button' && input.type !== 'submit') {
+                    input.value = '';
+                }
+            });
+            document.querySelectorAll('select').forEach(select => {
+                select.selectedIndex = 0;
+            });
+        }
+
+        // ========================
+        // API CALLS
+        // ========================
+
+        async function apiCall(endpoint, options = {}) {
+            try {
+                const response = await fetch(`${API_URI}${endpoint}`, {
+                    credentials: 'include', // Include cookies per sessioni
+                    headers: {
+                        'Content-Type': 'application/json',
+                        ...options.headers
+                    },
+                    ...options
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: 'Errore sconosciuto' }));
+                    throw new Error(errorData.error || `HTTP ${response.status}`);
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error('API Error:', error);
+                throw error;
+            }
+        }
+
+        // ========================
+        // AUTHENTICATION
+        // ========================
+
+        function showLoginForm() {
+            document.getElementById('loginForm').classList.remove('hidden');
+            document.getElementById('registrationForm').classList.add('hidden');
+        }
+
+        function showRegistrationForm() {
+            document.getElementById('loginForm').classList.add('hidden');
+            document.getElementById('registrationForm').classList.remove('hidden');
+        }
+
+        async function login() {
+            const fiscalCode = document.getElementById('loginFiscalCode').value.trim().toUpperCase();
+            
+            if (!fiscalCode) {
+                showMessage('Inserisci il codice fiscale', 'error');
+                return;
+            }
+
+            try {
+                const result = await apiCall('/session/login', {
+                    method: 'POST',
+                    body: JSON.stringify({ fiscalCode })
+                });
+
+                currentUser = result.user;
+                showMessage(`Benvenuto, ${currentUser.name}!`, 'success');
+                showUserDashboard();
+                await loadUserData();
+
+            } catch (error) {
+                showMessage(`Errore durante il login: ${error.message}`, 'error');
+            }
+        }
+
+        async function register() {
+            const name = document.getElementById('regName').value.trim();
+            const surname = document.getElementById('regSurname').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const fiscalCode = document.getElementById('regFiscalCode').value.trim().toUpperCase();
+
+            if (!name || !surname || !email || !fiscalCode) {
+                showMessage('Tutti i campi sono obbligatori', 'error');
+                return;
+            }
+
+            try {
+                const result = await apiCall('/users', {
+                    method: 'POST',
+                    body: JSON.stringify({ name, surname, email, fiscalCode })
+                });
+
+                showMessage('Registrazione completata! Ora puoi effettuare il login.', 'success');
+                clearForms();
+                showLoginForm();
+
+            } catch (error) {
+                showMessage(`Errore durante la registrazione: ${error.message}`, 'error');
+            }
+        }
+
+        async function logout() {
+            try {
+                await apiCall('/session/logout', { method: 'POST' });
+                currentUser = null;
+                clearForms();
+                showAuthSection();
+                showMessage('Logout effettuato con successo', 'success');
+            } catch (error) {
+                showMessage(`Errore durante il logout: ${error.message}`, 'error');
+            }
+        }
+
+        // ========================
+        // NAVIGATION
+        // ========================
+
+        function showAuthSection() {
+            document.getElementById('authSection').classList.remove('hidden');
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+            showLoginForm();
+        }
+
+        function showUserDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('userDashboard').classList.remove('hidden');
+            document.getElementById('adminDashboard').classList.add('hidden');
+        }
+
+        function showAdminDashboard() {
+            document.getElementById('authSection').classList.add('hidden');
+            document.getElementById('userDashboard').classList.add('hidden');
+            document.getElementById('adminDashboard').classList.remove('hidden');
+            loadSystemStats();
+            loadAllUsers();
+            loadAllVouchers();
+        }
+
+        // ========================
+        // USER DATA LOADING
+        // ========================
+
+        async function loadUserData() {
+            if (!currentUser) return;
+
+            try {
+                // Carica dati utente aggiornati
+                const userData = await apiCall(`/users/${currentUser.id}`);
+                currentUser = userData;
+                
+                // Aggiorna UI
+                updateUserInfo();
+                updateBudgetSummary();
+                await loadUserVouchers();
+
+            } catch (error) {
+                showMessage(`Errore nel caricamento dati: ${error.message}`, 'error');
+            }
+        }
+
+        function updateUserInfo() {
+            if (!currentUser) return;
+
+            const userInfoDiv = document.getElementById('userInfo');
+            userInfoDiv.innerHTML = `
+                <p><strong>Nome:</strong> ${currentUser.name} ${currentUser.surname}</p>
+                <p><strong>Email:</strong> ${currentUser.email}</p>
+                <p><strong>Codice Fiscale:</strong> ${currentUser.fiscalCode}</p>
+                <p><strong>Registrazione:</strong> ${formatDateTime(currentUser.registrationDate)}</p>
+            `;
+        }
+
+        function updateBudgetSummary() {
+            if (!currentUser) return;
+
+            const budgetDiv = document.getElementById('budgetSummary');
+            budgetDiv.innerHTML = `
+                <div class="budget-card">
+                    <h4>💳 Budget Totale</h4>
+                    <div class="amount">${formatCurrency(currentUser.totalBudget)}</div>
+                </div>
+                <div class="budget-card">
+                    <h4>✅ Disponibile</h4>
+                    <div class="amount" style="color: #27ae60;">${formatCurrency(currentUser.availableBudget)}</div>
+                </div>
+                <div class="budget-card">
+                    <h4>⏳ In Uso</h4>
+                    <div class="amount" style="color: #f39c12;">${formatCurrency(currentUser.usedBudget)}</div>
+                </div>
+                <div class="budget-card">
+                    <h4>✨ Consumato</h4>
+                    <div class="amount" style="color: #e74c3c;">${formatCurrency(currentUser.consumedBudget)}</div>
+                </div>
+            `;
+        }
+
+        // ========================
+        // VOUCHER MANAGEMENT
+        // ========================
+
+        async function createVoucher() {
+            const amount = parseFloat(document.getElementById('voucherAmount').value);
+            const category = document.getElementById('voucherCategory').value;
+
+            if (!amount || amount <= 0) {
+                showMessage('Inserisci un importo valido', 'error');
+                return;
+            }
+
+            if (!category) {
+                showMessage('Seleziona una categoria', 'error');
+                return;
+            }
+
+            if (amount > currentUser.availableBudget) {
+                showMessage(`Importo troppo alto. Disponibile: ${formatCurrency(currentUser.availableBudget)}`, 'error');
+                return;
+            }
+
+            try {
+                const result = await apiCall('/vouchers', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        userId: currentUser.id,
+                        amount: amount,
+                        category: category
+                    })
+                });
+
+                showMessage('Buono creato con successo!', 'success');
+                clearForms();
+                await loadUserData(); // Ricarica dati aggiornati
+
+            } catch (error) {
+                showMessage(`Errore nella creazione del buono: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadUserVouchers() {
+            if (!currentUser) return;
+
+            try {
+                const vouchers = await apiCall(`/vouchers/user/${currentUser.id}`);
+                displayUserVouchers(vouchers);
+            } catch (error) {
+                showMessage(`Errore nel caricamento buoni: ${error.message}`, 'error');
+            }
+        }
+
+        function displayUserVouchers(vouchers) {
+    const vouchersDiv = document.getElementById('userVouchersList');
+    
+    if (!vouchers || vouchers.length === 0) {
+        vouchersDiv.innerHTML = '<p class="loading">Nessun buono presente</p>';
+        return;
+    }
+
+    let html = `
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Importo</th>
+                    <th>Categoria</th>
+                    <th>Stato</th>
+                    <th>Creato</th>
+                    <th>Consumato</th>
+                    <th>Azioni</th>
+                </tr>
+            </thead>
+            <tbody>
+    `;
+
+    vouchers.forEach(voucher => {
+        console.log("DEBUG voucher ricevuto:", voucher); // debug
+        const status = voucher.status ? voucher.status.toLowerCase() : "unknown";
+        const isActive = status === 'active';
+        const statusText = isActive ? '✔️ Attivo' : '🔴 Consumato';
+        
+        html += `
+            <tr>
+                <td>${voucher.id}</td>
+                <td>${formatCurrency(voucher.amount)}</td>
+                <td>${voucher.categoryInfo.displayName}</td>
+                <td>${statusText}</td>
+                <td>${formatDateTime(voucher.createdAt)}</td>
+                <td>${formatDateTime(voucher.consumedAt)}</td>
+                <td>
+                    ${isActive ? `
+                        <button class="success" onclick="consumeVoucher(${voucher.id})">Consuma</button>
+                        <button onclick="editVoucherCategory(${voucher.id}, '${voucher.categoryInfo.displayName}')">Modifica</button>
+                        <button class="danger" onclick="deleteVoucher(${voucher.id})">Elimina</button>
+                    ` : ''}
+                </td>
+            </tr>
+        `;
+    });
+
+    html += '</tbody></table>';
+    vouchersDiv.innerHTML = html;
+}
+
+
+        async function consumeVoucher(voucherId) {
+            if (!confirm('Sei sicuro di voler consumare questo buono? Questa azione è irreversibile.')) {
+                return;
+            }
+
+            try {
+                await apiCall(`/vouchers/${voucherId}/consume`, { method: 'PUT' });
+                showMessage('Buono consumato con successo!', 'success');
+                await loadUserData();
+            } catch (error) {
+                showMessage(`Errore nel consumo del buono: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteVoucher(voucherId) {
+            console.log("DEBUG deleteVoucher chiamato con id=", voucherId);
+            if (!confirm('Sei sicuro di voler eliminare questo buono? Il budget verrà rilasciato.')) {
+                return;
+            }
+
+            try {
+                await apiCall(`/vouchers/${voucherId}`, { method: 'DELETE' });
+                showMessage('Buono eliminato con successo!', 'success');
+                await loadUserData();
+            } catch (error) {
+                showMessage(`Errore nell'eliminazione del buono: ${error.message}`, 'error');
+            }
+        }
+
+        async function editVoucherCategory(voucherId, currentCategory) {
+            const categories = [
+                'cinema', 'musica', 'concerti', 'eventi culturali', 
+                'libri', 'musei', 'strumenti musicali', 'teatro', 'danza'
+            ];
+            
+            const newCategory = prompt(`Nuova categoria (attuale: ${currentCategory}):\n\n${categories.join(', ')}`);
+            
+            if (!newCategory || !categories.includes(newCategory.toLowerCase())) {
+                showMessage('Categoria non valida', 'error');
+                return;
+            }
+
+            try {
+                await apiCall(`/vouchers/${voucherId}/category`, {
+                    method: 'PUT',
+                    body: JSON.stringify({ category: newCategory.toLowerCase() })
+                });
+                showMessage('Categoria aggiornata con successo!', 'success');
+                await loadUserData();
+            } catch (error) {
+                showMessage(`Errore nell'aggiornamento categoria: ${error.message}`, 'error');
+            }
+        }
+
+        // ========================
+        // ADMIN FUNCTIONS
+        // ========================
+
+        async function loadSystemStats() {
+            try {
+                const stats = await apiCall('/system/stats');
+                displaySystemStats(stats);
+            } catch (error) {
+                showMessage(`Errore nel caricamento statistiche: ${error.message}`, 'error');
+            }
+        }
+
+        function displaySystemStats(stats) {
+            const statsDiv = document.getElementById('systemStats');
+            statsDiv.innerHTML = `
+                <h3>📊 Statistiche Sistema</h3>
+                <div class="budget-summary">
+                    <div class="budget-card">
+                        <h4>👥 Utenti Totali</h4>
+                        <div class="amount" style="color: #3498db;">${stats.totalUsers}</div>
+                    </div>
+                    <div class="budget-card">
+                        <h4>💰 Budget Totale</h4>
+                        <div class="amount">${formatCurrency(stats.totalBudget)}</div>
+                    </div>
+                    <div class="budget-card">
+                        <h4>✅ Budget Disponibile</h4>
+                        <div class="amount" style="color: #27ae60;">${formatCurrency(stats.availableBudget)}</div>
+                    </div>
+                    <div class="budget-card">
+                        <h4>⏳ Budget in Uso</h4>
+                        <div class="amount" style="color: #f39c12;">${formatCurrency(stats.usedBudget)}</div>
+                    </div>
+                    <div class="budget-card">
+                        <h4>✨ Budget Consumato</h4>
+                        <div class="amount" style="color: #e74c3c;">${formatCurrency(stats.consumedBudget)}</div>
+                    </div>
+                    <div class="budget-card">
+                        <h4>🎫 Buoni Totali</h4>
+                        <div class="amount" style="color: #9b59b6;">${stats.totalVouchers}</div>
+                    </div>
+                    <div class="budget-card">
+                        <h4>🟢 Buoni Attivi</h4>
+                        <div class="amount" style="color: #27ae60;">${stats.activeVouchers}</div>
+                    </div>
+                    <div class="budget-card">
+                        <h4>🔴 Buoni Consumati</h4>
+                        <div class="amount" style="color: #e74c3c;">${stats.consumedVouchers}</div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function refreshSystemStats() {
+            await loadSystemStats();
+            showMessage('Statistiche aggiornate', 'success');
+        }
+
+        async function loadAllUsers() {
+            try {
+                const users = await apiCall('/users');
+                displayAllUsers(users);
+            } catch (error) {
+                showMessage(`Errore nel caricamento utenti: ${error.message}`, 'error');
+            }
+        }
+
+        function displayAllUsers(users) {
+            const usersDiv = document.getElementById('allUsersList');
+            
+            if (!users || users.length === 0) {
+                usersDiv.innerHTML = '<p class="loading">Nessun utente presente</p>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nome</th>
+                            <th>Email</th>
+                            <th>Codice Fiscale</th>
+                            <th>Budget Disponibile</th>
+                            <th>Budget Usato</th>
+                            <th>Budget Consumato</th>
+                            <th>Registrazione</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            users.forEach(user => {
+                html += `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name} ${user.surname}</td>
+                        <td>${user.email}</td>
+                        <td>${user.fiscalCode}</td>
+                        <td>${formatCurrency(user.availableBudget)}</td>
+                        <td>${formatCurrency(user.usedBudget)}</td>
+                        <td>${formatCurrency(user.consumedBudget)}</td>
+                        <td>${formatDateTime(user.registrationDate)}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            usersDiv.innerHTML = html;
+        }
+
+        async function loadAllVouchers() {
+            try {
+                const vouchers = await apiCall('/vouchers');
+                displayAllVouchers(vouchers);
+            } catch (error) {
+                showMessage(`Errore nel caricamento buoni: ${error.message}`, 'error');
+            }
+        }
+
+        function displayAllVouchers(vouchers) {
+            const vouchersDiv = document.getElementById('allVouchersList');
+            
+            if (!vouchers || vouchers.length === 0) {
+                vouchersDiv.innerHTML = '<p class="loading">Nessun buono presente</p>';
+                return;
+            }
+
+            let html = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>User ID</th>
+                            <th>Importo</th>
+                            <th>Categoria</th>
+                            <th>Stato</th>
+                            <th>Creato</th>
+                            <th>Consumato</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+            `;
+
+            vouchers.forEach(voucher => {
+                const statusText = voucher.status === 'active' ? '🟢 Attivo' : '🔴 Consumato';
+                
+                html += `
+                    <tr>
+                        <td>${voucher.id}</td>
+                        <td>${voucher.userId}</td>
+                        <td>${formatCurrency(voucher.amount)}</td>
+                        <td>${voucher.categoryInfo.displayName}</td>
+                        <td>${statusText}</td>
+                        <td>${formatDateTime(voucher.createdAt)}</td>
+                        <td>${formatDateTime(voucher.consumedAt)}</td>
+                    </tr>
+                `;
+            });
+
+            html += '</tbody></table>';
+            vouchersDiv.innerHTML = html;
+        }
+
+        // ========================
+        // INITIALIZATION
+        // ========================
+
+        window.onload = async function() {
+            showMessage('Benvenuto in Carta Cultura Giovani!', 'success');
+            
+            try {
+                // Verifica se esiste una sessione attiva
+                const sessionData = await apiCall('/session/current');
+                currentUser = sessionData.user;
+                showUserDashboard();
+                await loadUserData();
+                showMessage(`Bentornato, ${currentUser.name}!`, 'success');
+            } catch (error) {
+                // Nessuna sessione attiva, mostra login
+                showAuthSection();
+            }
+        };
+    </script>
+</body>
+</html>

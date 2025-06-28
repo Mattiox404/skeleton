@@ -1,0 +1,17 @@
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\CorsFilter.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\database\DatabaseClient.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\database\DatabaseException.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\ExampleResource.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\JsonException.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\JsonParsingException.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\model\SystemStats.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\model\User.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\model\Voucher.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\resource\SessionResource.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\resource\SystemResource.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\resource\UserResource.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\resource\VoucherResource.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\RestApplication.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\service\ServiceException.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\service\UserService.java
+C:\Users\m.hu19\Downloads\skeleton\server-web\src\main\java\it\unimib\sd2025\service\VoucherService.java
